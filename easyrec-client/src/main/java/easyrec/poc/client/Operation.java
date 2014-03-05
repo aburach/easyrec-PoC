@@ -1,6 +1,5 @@
 package easyrec.poc.client;
 
 public enum Operation {
-	VIEW,
-	
+	VIEW, BUY, RATE, SHARE, RECOMMEND,	
 }
