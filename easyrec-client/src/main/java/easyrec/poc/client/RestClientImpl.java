@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import easyrec.poc.client.entity.EasyrecResponse;
+import easyrec.poc.client.entity.Item;
 
 //TODO: refactor parameter parsing and validation
 
@@ -56,17 +57,35 @@ public class RestClientImpl implements RestClient {
 	}
 
 	private void doRecommendAction() {
-		throw new UnsupportedOperationException();
+		//TODO: test with failure!!!
+		String url = baseUrl + "/api/1.0/recommendationsforuser?apikey={apiKey}&tenantid={tenantId}&userid={userId}&itemid={itemId}&withProfile=true";
+		
+		EasyrecResponse response = template.getForObject(url, EasyrecResponse.class, params);
+
+		if (response.getFailureResponse() != null) {
+			log.info("Error: " + response.getFailureResponse().getMessage());
+		}
+
+		if (response.getRecommendations() != null && !response.getRecommendations().isEmpty()) {
+			log.info("Total " + response.getRecommendations().size()+ " items returned");
+			for (Item item : response.getRecommendations()) {
+				if (item != null) {
+					log.info(item.toString());
+				} else {
+					log.info("Null item returned");
+				}
+			}
+		}
 	}
 
 	private void doAddAction() {
 		//TODO: test with failure!!!
-		//TODO: parse complete response in case of success
-		String url = baseUrl + "/api/1.0/sendaction?actiontype={action}&apikey={apiKey}&tenantid={tenantId}&sessionid={sessionId}&itemid={itemId}&itemdescription={description}&itemurl={itemUrl}&userid={userId}";
-//		EasyrecResponse response = template.getForObject(url, EasyrecResponse.class, params);
-//		log.info(response.getResponseCode().getMessage());
-		Object response = template.getForObject(url, String.class, params);
-		log.info(response.toString());
+		String url = baseUrl + "/api/1.0/sendaction?actiontype={action}&apikey={apiKey}&tenantid={tenantId}&sessionid={sessionId}&itemid={itemId}&itemdescription={description}&itemurl={itemUrl}&userid={userId}&itemtype=ITEM";
+		EasyrecResponse response = template.getForObject(url, EasyrecResponse.class, params);
+		
+		if (response.getItem() != null) {
+			log.info(response.getItem().toString());
+		}
 	}
 
 	private void fillCallParameters() {
@@ -80,6 +99,7 @@ public class RestClientImpl implements RestClient {
 		params.put("userId", userId);
 		params.put("sessionId", sessionId);
 		params.put("apiKey", apiKey);
+		log.info("User ID " + userId + ", action " + action + ", item " + itemId);
 	}
 
 	private void login() {

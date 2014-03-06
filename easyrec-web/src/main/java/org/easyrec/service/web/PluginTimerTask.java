@@ -52,7 +52,10 @@ import java.util.TimerTask;
 public class PluginTimerTask {
 
     // TODO: move to vocabulary?
-    private static final long FIXED_RATE = 1000 * 60 * 60 * 24; // schedule every 24hours
+	
+	//TODO: rollback the change
+	//private static final long FIXED_RATE = 1000 * 60 * 60 * 24; // schedule every 24hours
+    private static final long FIXED_RATE = 1000 * 60 * 10; // schedule every 24hours
     private final Log logger = LogFactory.getLog(getClass());
 
     private Timer pluginTimer = null;
@@ -124,7 +127,9 @@ public class PluginTimerTask {
             if (now.after(execDate)) {
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(execDate);
-                cal.add(Calendar.DATE, 1);
+            	//TODO: rollback the change
+                //cal.add(Calendar.DATE, 1);
+                cal.add(Calendar.MINUTE, 10);
                 execDate = cal.getTime();
             }
             return execDate;
