@@ -26,10 +26,12 @@ import org.easyrec.service.core.ActionService;
 import org.easyrec.service.core.ItemAssocService;
 import org.easyrec.service.core.RecommendationHistoryService;
 import org.easyrec.service.core.RecommenderService;
+import org.easyrec.service.core.UserProfileService;
 import org.springframework.beans.factory.InitializingBean;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import static org.easyrec.util.core.RecommenderUtils.filterAlreadyActedOn;
 import static org.easyrec.util.core.RecommenderUtils.filterDuplicates;
@@ -71,6 +73,7 @@ public class RecommenderServiceImpl implements RecommenderService, InitializingB
     private ActionService actionService;
     private ItemAssocService itemAssocService;
     private RecommendationHistoryService recommendationHistoryService;
+    private UserProfileService userProfileService;
     private Integer maximumNumberOfRelatedItemsPerItem = null;
     private boolean filterResults = true;
 
@@ -122,6 +125,10 @@ public class RecommenderServiceImpl implements RecommenderService, InitializingB
             allRecommendedItems = doFiltering(tenantId, userId, sessionId, consideredActionTypeId, requestedItemTypeId,
                     allRecommendedItems, DEFAULT_USE_AVERAGE_PREDICTION_VALUES_FOR_DUPLICATES);
         }
+        
+        if (userId != null) {
+        	allRecommendedItems = doFilteringByUserProfile(allRecommendedItems, userId);
+        }
 
         // create recommendation object
         RecommendationVO<Integer, Integer> recommendation = new RecommendationVO<Integer, Integer>(
@@ -136,7 +143,31 @@ public class RecommenderServiceImpl implements RecommenderService, InitializingB
         return recommendation;
     }
 
-    @Override
+    private List<RecommendedItemVO<Integer, Integer>> doFilteringByUserProfile(
+			List<RecommendedItemVO<Integer, Integer>> allRecommendedItems,
+			Integer userId) {
+    	List<RecommendedItemVO<Integer, Integer>> filteredResult = new ArrayList<RecommendedItemVO<Integer,Integer>>();
+    	
+    	List<Integer> sourceItems = new ArrayList<Integer>();
+
+    	for (RecommendedItemVO<Integer, Integer> recommendedItem : allRecommendedItems) {
+    		sourceItems.add(recommendedItem.getItem().getItem());
+		}
+    	
+		Set<Integer> filteredItems = userProfileService.getFilteredItemsForUser(sourceItems, userId);
+
+    	for (RecommendedItemVO<Integer, Integer> recommendedItem : allRecommendedItems) {
+    		if (filteredItems.contains(recommendedItem.getItem().getItem())) {
+    			filteredResult.add(recommendedItem);
+    		}
+		}
+		
+		
+		return filteredResult;
+	}
+
+
+	@Override
     public RecommendationVO<Integer, Integer> getAlsoActedItems(Integer tenantId,
                                                                                                     Integer userId,
                                                                                                     String sessionId,
@@ -192,7 +223,15 @@ public class RecommenderServiceImpl implements RecommenderService, InitializingB
         return itemAssocService;
     }
 
-    public void setRecommendationHistoryService(RecommendationHistoryService recommendationHistoryService) {
+	public void setUserProfileService(UserProfileService userProfileService) {
+		this.userProfileService = userProfileService;
+	}
+	
+	public UserProfileService getUserProfileService() {
+		return userProfileService;
+	}
+
+	public void setRecommendationHistoryService(RecommendationHistoryService recommendationHistoryService) {
         this.recommendationHistoryService = recommendationHistoryService;
     }
 

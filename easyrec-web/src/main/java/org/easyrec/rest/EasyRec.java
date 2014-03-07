@@ -482,7 +482,6 @@ public class EasyRec {
 
         requestedItemType = checkItemType(requestedItemType, type, coreTenantId, tenantId, WS.ACTION_RECOMMENDATIONS_FOR_USER, callback, null);
 
-
         if (typeMappingService.getIdOfActionType(coreTenantId, actiontype) == null) {
             exceptionResponse(WS.ACTION_RECOMMENDATIONS_FOR_USER, MSG.OPERATION_FAILED.append(String.format(" actionType %s not found for tenant %s", actiontype, tenantId)), type, callback);
         }

@@ -15,6 +15,7 @@
         <property name="actionService" ref="actionService"/>
         <property name="itemAssocService" ref="itemAssocService"/>
         <property name="recommendationHistoryService" ref="recommendationHistoryService"/>
+        <property name="userProfileService" ref="userProfileService"/>
         <!-- In certain circumstances the actual number of results can get lower due to e.g.
  duplicate filtering. To compensate use higher values -->
         <property name="maximumNumberOfRelatedItemsPerItem"

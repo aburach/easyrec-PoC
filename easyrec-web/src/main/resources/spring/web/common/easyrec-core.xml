@@ -25,6 +25,8 @@
     <import resource="classpath:spring/core/dao/RecommendationDAO.xml"/>
     <import resource="classpath:spring/core/dao/RecommendedItemDAO.xml"/>
     <import resource="classpath:spring/core/dao/ProfileDAO.xml"/>
+    <import resource="classpath:spring/core/dao/UserProfileDAO.xml"/>
+    <import resource="classpath:spring/core/service/UserProfileService.xml"/>
     <!-- uncomment RecommendationHistoryService so recommendations aren't logged to databease - major performance penalty -->
     <!--import resource="classpath:spring/core/RecommendationHistoryService.xml" />
   <import resource="classpath:spring/core/RecommenderService.xml" /-->
