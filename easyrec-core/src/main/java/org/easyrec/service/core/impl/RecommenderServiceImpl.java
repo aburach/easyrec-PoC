@@ -17,6 +17,14 @@
  */
 package org.easyrec.service.core.impl;
 
+import static org.easyrec.util.core.RecommenderUtils.filterAlreadyActedOn;
+import static org.easyrec.util.core.RecommenderUtils.filterDuplicates;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import org.apache.log4j.Logger;
 import org.easyrec.model.core.AssociatedItemVO;
 import org.easyrec.model.core.ItemVO;
 import org.easyrec.model.core.RecommendationVO;
@@ -28,13 +36,6 @@ import org.easyrec.service.core.RecommendationHistoryService;
 import org.easyrec.service.core.RecommenderService;
 import org.easyrec.service.core.UserProfileService;
 import org.springframework.beans.factory.InitializingBean;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
-import static org.easyrec.util.core.RecommenderUtils.filterAlreadyActedOn;
-import static org.easyrec.util.core.RecommenderUtils.filterDuplicates;
 
 /**
  * Implementation of the {@link org.easyrec.service.core.RecommenderService} interface.
@@ -67,6 +68,8 @@ public class RecommenderServiceImpl implements RecommenderService, InitializingB
 
     private final static String EXPLANATION_RELATED_1 = "this item is related to the currently acted on item '";
     private final static String EXPLANATION_RELATED_2 = "' via the assoc type '";
+    
+    private static final Logger log = Logger.getLogger(RecommenderService.class);
 
     //////////////////////////////////////////////////////////////////////////////
     // members
@@ -119,16 +122,28 @@ public class RecommenderServiceImpl implements RecommenderService, InitializingB
                 }
             }
         }
+        
+        log.info("Filtering is " + (filterResults ? "enabled":"disabled"));
 
         // filter duplicates and history
         if (filterResults) {
+        	log.info("Before filtering duplicates: " + allRecommendedItems.size() + " items");
+        	
             allRecommendedItems = doFiltering(tenantId, userId, sessionId, consideredActionTypeId, requestedItemTypeId,
                     allRecommendedItems, DEFAULT_USE_AVERAGE_PREDICTION_VALUES_FOR_DUPLICATES);
+            
+            log.info("Before filtering by profile: " + allRecommendedItems.size() + " items");
+            
+            for (RecommendedItemVO<Integer, Integer> recommendedItemVO : allRecommendedItems) {
+				log.info("> " + recommendedItemVO.getItem().getItem());
+			}
+            
+            if (userId != null) {
+            	allRecommendedItems = doFilteringByUserProfile(allRecommendedItems, userId);
+            }
+            log.info("After filtering: " + allRecommendedItems.size() + " items");
         }
         
-        if (userId != null) {
-        	allRecommendedItems = doFilteringByUserProfile(allRecommendedItems, userId);
-        }
 
         // create recommendation object
         RecommendationVO<Integer, Integer> recommendation = new RecommendationVO<Integer, Integer>(
