@@ -1,0 +1,85 @@
+Instruction below assumes Unix environment. 
+Prerequisites:
+ 1. Java SE SDK 1.7.0_45
+ 2. git 1.7.5.4
+ 3. Maven 3.0.4
+ 4. MySQL 5.1.69
+ 5. Tomcat 7.0.52 
+
+1. Building project code
+
+ 1.1. Go to temporary directory and download project sources:
+     
+     git clone https://github.com/customertimes/easyrec-PoC.git
+     
+ 1.2. Build project:
+     
+     cd easyrec-PoC
+     mvn -Dmaven.test.skip=true package
+     
+     When build finishes, resulting WAR binary is located in easyrec-web/target. Go to this directory
+     and execute following command:
+     
+     mv easyrec-web-0.99-SNAPSHOT.war easyrec-web.war
+     
+     cd easyrec-client
+     mvn -Dmaven.test.skip=true package
+     
+2. DB setup (part I)
+
+ 2.1. Create user 'easyrec' with password 'easyrec'.
+ 
+ 2.2. Login to mysql using root account and execute following commands:
+ 	
+ 	create database easyrec;
+	grant index, create, select, insert, update, drop, delete, alter, lock tables on easyrec.* to 'easyrec'@'localhost'
+       identified by 'easyrec';
+       
+3. Deployment
+
+ 3.1. Deploy easyrec-web.war into Tomcat. Simplest way is to just copy WAR file into webapp subdirectory of Tomcat.
+ 
+ 3.2. Using blowser open following URL: http://localhost:8080/easyrec-web/
+ At first start easyrec proposes to provide DB connection credentials and initializes DB with the default data.
+ 
+4. DB setup (part II)
+
+ 4.1. Connect to MySQL using following command line:
+	
+	mysql -u easyrec --password=easyrec
+	
+ 4.2. Execute following commands:
+    
+    use easyrec
+    delete from action;
+    delete from item where itemtype = 'ITEM';
+    
+    Copy content of misc-resources/create-tables.sql into clipoard and paste it into MySQL client console. It will 
+    create/alter necessary tables and load required data into these tables.
+    
+ 4.3. Go to easyrec-client/run directory and execute following commands:
+  
+    ./add-actions.sh actions.list
+    ./add-actions.sh actions2.list
+    ./add-actions.sh actions3.list
+    ./add-actions.sh actions4.list
+    ./add-actions.sh actions5.list
+    ./add-actions.sh actions6.list
+
+ 5. Checking first scenario (filtering by user profile):
+ 
+    Execute following command:
+    
+    ./get-recommendations.sh 1 5
+    
+    (first parameter is the user ID, second is the item ID)
+    
+    Resulting output should look like this (some lines skipped):
+    
+2014-03-10  18:45:19: [INFO ] [main]          poc.client.RestClient - User ID 1, action RECOMMEND, item 5
+2014-03-10  18:45:19: [INFO ] [main]          poc.client.RestClient - Administrator is signed in!
+2014-03-10  18:45:19: [INFO ] [main]          poc.client.RestClient - User ID 1, action RECOMMEND, item 5
+2014-03-10  18:45:19: [INFO ] [main]          poc.client.RestClient - Total 1 items returned
+2014-03-10  18:45:19: [INFO ] [main]          poc.client.RestClient - {6,null,"Recipe 6 (American)",http://localhost:8080/easyrec-web/t?r=1&t=1&f=0&i=6&a=999&u=http%3A%2F%2Feasyrec.org%2Frecipes%2F6,http://easyrec.org/recipes/6.jpg}
+
+    
