@@ -84,7 +84,10 @@ public class RestClientImpl implements RestClient {
 		EasyrecResponse response = template.getForObject(url, EasyrecResponse.class, params);
 		
 		if (response.getItem() != null) {
-			log.info(response.getItem().toString());
+			log.info("Added: " + response.getItem().toString());
+		} else {
+			log.info("Unable to add action " + action + " for user " + userId + " item " + itemId);
+			log.info(response.getFailureResponse().getMessage());
 		}
 	}
 
@@ -119,7 +122,13 @@ public class RestClientImpl implements RestClient {
 		if (action == null) {
 			throw new InvalidParameterException("Action must be defined");
 		}
-		op = Operation.valueOf(action.toUpperCase());
+		
+		try {
+			op = Operation.valueOf(action.toUpperCase());
+		} catch (IllegalArgumentException e) {
+			throw new InvalidParameterException("Unknown action '" + action + "'");
+		}
+		
 		if (baseUrl == null) {
 			throw new InvalidParameterException("Base URL must be defined");
 		}

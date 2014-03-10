@@ -18,6 +18,7 @@
     <import resource="classpath:spring/core/idMapping.xml"/>
     <import resource="classpath:spring/core/service/ActionService.xml"/>
     <import resource="classpath:spring/core/service/ItemAssocService.xml"/>
+    <import resource="classpath:spring/core/service/UserProfileService.xml"/>
     <import resource="classpath:spring/core/dao/ActionDAO.xml"/>
     <import resource="classpath:spring/core/dao/ArchiveDAO.xml"/>
     <import resource="classpath:spring/core/dao/AuthenticationDAO.xml"/>
@@ -26,10 +27,9 @@
     <import resource="classpath:spring/core/dao/RecommendedItemDAO.xml"/>
     <import resource="classpath:spring/core/dao/ProfileDAO.xml"/>
     <import resource="classpath:spring/core/dao/UserProfileDAO.xml"/>
-    <import resource="classpath:spring/core/service/UserProfileService.xml"/>
     <!-- uncomment RecommendationHistoryService so recommendations aren't logged to databease - major performance penalty -->
     <!--import resource="classpath:spring/core/RecommendationHistoryService.xml" />
-  <import resource="classpath:spring/core/RecommenderService.xml" /-->
+  		<import resource="classpath:spring/core/RecommenderService.xml" /-->
     <bean id="recommenderService"
           class="org.easyrec.service.core.impl.RecommenderServiceImpl">
         <property name="actionService" ref="actionService"/>
@@ -37,6 +37,7 @@
         <property name="recommendationHistoryService">
             <null/>
         </property>
+        <property name="userProfileService" ref="userProfileService"/>
         <!-- In certain circumstances the actual number of results can get lower due to e.g.
  duplicate filtering. To compensate use higher values -->
         <property name="maximumNumberOfRelatedItemsPerItem"
